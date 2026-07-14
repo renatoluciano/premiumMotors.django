@@ -92,3 +92,7 @@ USE_TZ = True
 # Arquivos estáticos (CSS, JavaScript)
 STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Configurações para arquivos de mídia (Upload de fotos dos veículos)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
