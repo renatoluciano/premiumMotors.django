@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Motors | Vitrine de Veículos</title>
+    <!-- Link do Bootstrap 5 corrigido para o visual moderno -->
+    <link href="https://jsdelivr.net" rel="stylesheet">
+    <style>
+        .card-img-top {
+            height: 220px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+    <!-- Barra de Navegação Superior -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-uppercase" href="#">✨ Premium Motors</a>
+            <span class="navbar-text text-white-50">Novos, Seminovos e Usados</span>
+        </div>
+    </nav>
+
+    <!-- Banner de Boas-vindas -->
+    <div class="bg-dark text-white py-5 mb-5 border-top border-secondary">
+        <div class="container text-center">
+            <h1 class="display-4 fw-bold">Encontre seu próximo carro</h1>
+            <p class="lead text-white-50">Modelos selecionados com garantia de qualidade e procedência.</p>
+        </div>
+    </div>
+
+    <!-- Formulário de Filtros Avançados -->
+    <div class="container mb-4">
+        <div class="card shadow-sm border-0 p-4 bg-white">
+            <form method="GET" action="" class="row g-3">
+                
+                <!-- Barra de busca por texto -->
+                <div class="col-12 col-md-4">
+                    <label for="pesquisa" class="form-label fw-bold text-secondary small">Buscar por modelo ou versão</label>
+                    <input type="text" name="pesquisa" id="pesquisa" class="form-control" placeholder="Ex: Onix, Turbo..." value="{{ request.GET.pesquisa|default:'' }}">
+                </div>
+
+                <!-- Seleção de Marcas dinâmicas vindas do banco -->
+                <div class="col-12 col-sm-6 col-md-3">
+                    <label for="marca" class="form-label fw-bold text-secondary small">Marca</label>
+                    <select name="marca" id="marca" class="form-select">
+                        <option value="">Todas as Marcas</option>
+                        {% for marca in marcas %}
+                            <option value="{{ marca.id }}" {% if request.GET.marca == marca.id|stringformat:"i" %}selected{% endif %}>{{ marca.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Seleção por estado de conservação -->
+                <div class="col-12 col-sm-6 col-md-3">
+                    <label for="estado" class="form-label fw-bold text-secondary small">Estado do Veículo</label>
+                    <select name="estado" id="estado" class="form-select">
+                        <option value="">Todos os Estados</option>
+                        <option value="NOVO" {% if request.GET.estado == 'NOVO' %}selected{% endif %}>Novo (Zero Km)</option>
+                        <option value="SEMI" {% if request.GET.estado == 'SEMI' %}selected{% endif %}>Seminovo</option>
+                        <option value="USADO" {% if request.GET.estado == 'USADO' %}selected{% endif %}>Usado</option>
+                    </select>
+                </div>
+
+                <!-- Botão de Filtragem -->
+                <div class="col-12 col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-dark w-100 fw-bold py-2">🔍 Filtrar</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Container do Estoque -->
+    <div class="container mb-5">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            
+            <!-- Loop do Django: Vai repetir esse bloco para cada carro no banco -->
+            {% for veiculo in veiculos %}
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0">
+                    
+                    <!-- Exibe a foto do carro ou uma imagem padrão cinza se não houver foto -->
+                    {% if veiculo.imagem_principal %}
+                        <img src="{{ veiculo.imagem_principal.url }}" class="card-img-top" alt="{{ veiculo.modelo }}">
+                    {% else %}
+                        <div class="bg-secondary text-white d-flex align-items-center justify-content-center card-img-top">
+                            <span>Sem foto cadastrada</span>
+                        </div>
+                    {% endif %}
+
+                    <!-- Corpo do Card -->
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title mb-0 fw-bold">{{ veiculo.modelo }}</h5>
+                            <span class="badge {% if veiculo.estado == 'NOVO' %}bg-success{% elif veiculo.estado == 'SEMI' %}bg-info text-dark{% else %}bg-secondary{% endif %}">
+                                {{ veiculo.get_estado_display }}
+                            </span>
+                        </div>
+                        <p class="card-text text-muted mb-1">{{ veiculo.marca.nome }} · {{ veiculo.versao }}</p>
+                        <p class="card-text text-muted small mb-3">
+                            Ano: <strong>{{ veiculo.ano_modelo }}</strong> | 
+                            Km: <strong>{{ veiculo.quilometragem }} km</strong> | 
+                            Cor: <strong>{{ veiculo.cor }}</strong>
+                        </p>
+                        <h4 class="text-primary fw-bold mb-0">R$ {{ veiculo.preco }}</h4>
+                    </div>
+
+                    <!-- Rodapé do Card -->
+                    <div class="card-footer bg-transparent border-top-0 pb-3">
+                        <a href="#" class="btn btn-outline-dark w-100 fw-bold">Ver Detalhes</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <!-- Mensagem caso nenhum carro tenha sido cadastrado ainda -->
+            <div class="col-12 text-center py-5">
+                <h3 class="text-muted">Nenhum veículo disponível no momento.</h3>
+                <p>Acesse o painel administrativo para cadastrar novos carros!</p>
+            </div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+    <!-- Rodapé -->
+    <footer class="bg-dark text-white text-center py-4 border-top border-secondary">
+        <p class="mb-0 small text-white-50">&copy; 2026 Premium Motors. Todos os direitos reservados.</p>
+    </footer>
+
+    <!-- Script do Bootstrap corrigido -->
+    <script src="https://jsdelivr.net"></script>
+</body>
+</html>
